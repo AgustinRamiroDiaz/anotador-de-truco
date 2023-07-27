@@ -5,6 +5,8 @@ authors = ["Agustín Díaz <agustin.ramiro.diaz@gmail.com>"]
 edition = "2021"
 rust-version = "1.65"
 
+[build]
+target_arch = "wasm32"
 
 [dependencies]
 egui = "0.22.0"
