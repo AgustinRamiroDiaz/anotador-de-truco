@@ -66,7 +66,7 @@ impl eframe::App for MyApp {
         });
 
         egui::SidePanel::left("side_panel").show(ctx, |ui| {
-            ui.heading("Nosotros");
+            ui.heading("Nosotres");
 
             if ui.button("+").clicked() {
                 self.brain.update(Event::IncrementA);
