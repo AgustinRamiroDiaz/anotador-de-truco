@@ -68,27 +68,30 @@ impl eframe::App for MyApp {
         egui::SidePanel::left("side_panel").show(ctx, |ui| {
             ui.heading("Nosotres");
 
-            if ui.button("+").clicked() {
-                self.brain.update(Event::IncrementA);
-            }
-            if ui.button("-").clicked() {
-                self.brain.update(Event::DecrementA);
-            }
-            ui.heading(self.brain.state.counterA.to_string());
+            ui.horizontal(|ui| {
+                if ui.button("-").clicked() {
+                    self.brain.update(Event::DecrementA);
+                }
+                ui.heading(self.brain.state.counterA.to_string());
+                if ui.button("+").clicked() {
+                    self.brain.update(Event::IncrementA);
+                }
+            })
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
             // The central panel the region left after adding TopPanel's and SidePanel's
             ui.heading("Elles");
 
-            if ui.button("+").clicked() {
-                self.brain.update(Event::IncrementB);
-            }
-            if ui.button("-").clicked() {
-                self.brain.update(Event::DecrementB);
-            }
-            ui.heading(self.brain.state.counterB.to_string());
-
+            ui.horizontal(|ui| {
+                if ui.button("-").clicked() {
+                    self.brain.update(Event::DecrementB);
+                }
+                ui.heading(self.brain.state.counterB.to_string());
+                if ui.button("+").clicked() {
+                    self.brain.update(Event::IncrementB);
+                }
+            });
             egui::warn_if_debug_build(ui);
         });
     }
