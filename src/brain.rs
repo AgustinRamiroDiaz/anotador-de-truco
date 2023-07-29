@@ -6,7 +6,7 @@ pub struct Brain {
     pub state_history: Vec<State>,
 }
 
-#[derive(serde::Deserialize, serde::Serialize, Clone)]
+#[derive(serde::Deserialize, serde::Serialize, Clone, PartialEq)]
 pub struct State {
     pub counterA: u8,
     pub counterB: u8,
@@ -29,6 +29,7 @@ pub enum Event {
     DecrementB,
     Commit,
     Rollback,
+    Clear,
 }
 
 impl Brain {
@@ -45,11 +46,22 @@ impl Brain {
             Event::DecrementA => self.state.counterA = self.state.counterA.saturating_sub(1),
             Event::IncrementB => self.state.counterB += 1,
             Event::DecrementB => self.state.counterB = self.state.counterB.saturating_sub(1),
-            Event::Commit => self.state_history.push(self.state.clone()),
+            Event::Commit => {
+                if let Some(state) = self.state_history.last() {
+                    if state == &self.state {
+                        return;
+                    }
+                }
+                self.state_history.push(self.state.clone());
+            }
             Event::Rollback => {
                 if let Some(state) = self.state_history.pop() {
                     self.state = state;
                 }
+            }
+            Event::Clear => {
+                self.state = State::new();
+                self.state_history.clear();
             }
         }
     }

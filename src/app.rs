@@ -92,6 +92,19 @@ impl eframe::App for MyApp {
                     self.brain.update(Event::IncrementB);
                 }
             });
+
+            if ui.button("Commit").clicked() {
+                self.brain.update(Event::Commit);
+            }
+
+            if ui.button("Rollback").clicked() {
+                self.brain.update(Event::Rollback);
+            }
+
+            if ui.button("Clear").clicked() {
+                self.brain.update(Event::Clear);
+            }
+
             egui::warn_if_debug_build(ui);
         });
     }
