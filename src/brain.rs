@@ -1,5 +1,3 @@
-use std::ops::Sub;
-
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct Brain {
     pub state: State,
@@ -27,6 +25,8 @@ pub enum Event {
     DecrementA,
     IncrementB,
     DecrementB,
+    Delete(State),
+    Load(State),
     Commit,
     Rollback,
     Clear,
@@ -62,6 +62,12 @@ impl Brain {
             Event::Clear => {
                 self.state = State::new();
                 self.state_history.clear();
+            }
+            Event::Delete(state) => {
+                self.state_history.retain(|s| s != &state);
+            }
+            Event::Load(state) => {
+                self.state = state;
             }
         }
     }

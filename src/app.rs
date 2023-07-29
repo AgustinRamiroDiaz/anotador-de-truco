@@ -66,6 +66,31 @@ impl eframe::App for MyApp {
         });
 
         egui::SidePanel::left("side_panel").show(ctx, |ui| {
+            let mut events = Vec::new();
+            self.brain
+                .state_history
+                .iter()
+                .enumerate()
+                .rev()
+                .for_each(|(i, state)| {
+                    let i = i + 1;
+                    ui.horizontal(|ui| {
+                        ui.label(format!("Ronda {} {}-{}", i, state.counterA, state.counterB));
+                        if ui.button("Load").clicked() {
+                            events.push(Event::Load(state.clone()));
+                        }
+                        if ui.button("Delete").clicked() {
+                            events.push(Event::Delete(state.clone()));
+                        }
+                    });
+                });
+
+            events
+                .into_iter()
+                .for_each(|event| self.brain.update(event));
+        });
+
+        egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Nosotres");
 
             ui.horizontal(|ui| {
@@ -76,11 +101,8 @@ impl eframe::App for MyApp {
                 if ui.button("+").clicked() {
                     self.brain.update(Event::IncrementA);
                 }
-            })
-        });
+            });
 
-        egui::CentralPanel::default().show(ctx, |ui| {
-            // The central panel the region left after adding TopPanel's and SidePanel's
             ui.heading("Elles");
 
             ui.horizontal(|ui| {
