@@ -4,7 +4,8 @@ use crate::brain::*;
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct MyApp {
-    label: String,
+    label_a: String,
+    label_b: String,
 
     // #[serde(skip)]
     brain: Brain,
@@ -16,8 +17,8 @@ pub struct MyApp {
 impl Default for MyApp {
     fn default() -> Self {
         Self {
-            // Example stuff:
-            label: "Hello World!".to_owned(),
+            label_a: "Nosotres".to_owned(),
+            label_b: "Elles".to_owned(),
             brain: Brain::new(),
         }
     }
@@ -66,7 +67,6 @@ impl eframe::App for MyApp {
         });
 
         egui::SidePanel::left("side_panel").show(ctx, |ui| {
-            let mut events = Vec::new();
             self.brain
                 .state_history
                 .iter()
@@ -74,56 +74,58 @@ impl eframe::App for MyApp {
                 .rev()
                 .for_each(|(i, state)| {
                     let i = i + 1;
-                    ui.horizontal(|ui| {
-                        ui.label(format!("Ronda {} {}-{}", i, state.counterA, state.counterB));
-                        if ui.button("Load").clicked() {
-                            events.push(Event::Load(state.clone()));
-                        }
-                        if ui.button("Delete").clicked() {
-                            events.push(Event::Delete(state.clone()));
-                        }
-                    });
+                    ui.label(format!(
+                        "Ronda {}: {} {}-{} {}",
+                        i, self.label_a, state.counterA, state.counterB, self.label_b
+                    ));
                 });
-
-            events
-                .into_iter()
-                .for_each(|event| self.brain.update(event));
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Nosotres");
+            egui::Grid::new("some_unique_id").show(ui, |ui| {
+                ui.text_edit_singleline(&mut self.label_a);
 
-            ui.horizontal(|ui| {
-                if ui.button("-").clicked() {
-                    self.brain.update(Event::DecrementA);
+                if self.brain.canDecrementA() {
+                    if ui.button("-").clicked() {
+                        self.brain.update(Event::DecrementA);
+                    }
+                } else {
+                    ui.label("");
                 }
+
                 ui.heading(self.brain.state.counterA.to_string());
                 if ui.button("+").clicked() {
                     self.brain.update(Event::IncrementA);
                 }
-            });
+                ui.end_row();
 
-            ui.heading("Elles");
+                ui.text_edit_singleline(&mut self.label_b);
 
-            ui.horizontal(|ui| {
-                if ui.button("-").clicked() {
-                    self.brain.update(Event::DecrementB);
+                if self.brain.canDecrementB() {
+                    if ui.button("-").clicked() {
+                        self.brain.update(Event::DecrementB);
+                    }
+                } else {
+                    ui.label("");
                 }
                 ui.heading(self.brain.state.counterB.to_string());
                 if ui.button("+").clicked() {
                     self.brain.update(Event::IncrementB);
                 }
+                ui.end_row();
             });
 
-            if ui.button("Commit").clicked() {
+            ui.horizontal(|ui| {});
+
+            if ui.button("Guardar ronda").clicked() {
                 self.brain.update(Event::Commit);
             }
 
-            if ui.button("Rollback").clicked() {
+            if ui.button("Cargar ultima ronda").clicked() {
                 self.brain.update(Event::Rollback);
             }
 
-            if ui.button("Clear").clicked() {
+            if ui.button("Limpiar").clicked() {
                 self.brain.update(Event::Clear);
             }
 

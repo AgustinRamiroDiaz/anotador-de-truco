@@ -25,8 +25,6 @@ pub enum Event {
     DecrementA,
     IncrementB,
     DecrementB,
-    Delete(State),
-    Load(State),
     Commit,
     Rollback,
     Clear,
@@ -63,12 +61,22 @@ impl Brain {
                 self.state = State::new();
                 self.state_history.clear();
             }
-            Event::Delete(state) => {
-                self.state_history.retain(|s| s != &state);
-            }
-            Event::Load(state) => {
-                self.state = state;
-            }
+        }
+    }
+
+    pub fn canDecrementA(&self) -> bool {
+        if let Some(state) = self.state_history.last() {
+            state.counterA < self.state.counterA
+        } else {
+            self.state.counterA > 0
+        }
+    }
+
+    pub fn canDecrementB(&self) -> bool {
+        if let Some(state) = self.state_history.last() {
+            state.counterB < self.state.counterB
+        } else {
+            self.state.counterB > 0
         }
     }
 }
