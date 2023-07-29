@@ -82,26 +82,76 @@ impl eframe::App for MyApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
+            use egui::Color32;
+            use egui_extras::{Size, StripBuilder};
+
+            // strip example https://github.com/emilk/egui/blob/master/crates/egui_demo_lib/src/demo/strip_demo.rs
+            StripBuilder::new(ui)
+                .size(Size::relative(0.5))
+                .size(Size::remainder())
+                .horizontal(|mut strip| {
+                    strip.strip(|builder| {
+                        builder.sizes(Size::remainder(), 2).vertical(|mut strip| {
+                            strip.cell(|ui| {
+                                ui.painter().rect_filled(
+                                    ui.available_rect_before_wrap(),
+                                    0.0,
+                                    Color32::RED,
+                                );
+                                ui.text_edit_singleline(&mut self.label_a);
+                            });
+                            strip.cell(|ui| {
+                                ui.horizontal(|ui| {
+                                    if self.brain.can_decrement_a() {
+                                        if ui.button("-").clicked() {
+                                            self.brain.update(Event::DecrementA);
+                                        }
+                                    } else {
+                                        ui.label("");
+                                    }
+
+                                    ui.heading(self.brain.state.counterA.to_string());
+                                    if ui.button("+").clicked() {
+                                        self.brain.update(Event::IncrementA);
+                                    }
+                                });
+                            });
+                        });
+                    });
+                    strip.strip(|builder| {
+                        builder.sizes(Size::remainder(), 2).vertical(|mut strip| {
+                            strip.cell(|ui| {
+                                ui.painter().rect_filled(
+                                    ui.available_rect_before_wrap(),
+                                    0.0,
+                                    Color32::RED,
+                                );
+                                ui.label("width: 50%\nheight: remaining");
+                            });
+                            strip.strip(|builder| {
+                                builder.sizes(Size::remainder(), 3).vertical(|mut strip| {
+                                    strip.empty();
+                                    strip.cell(|ui| {
+                                        ui.painter().rect_filled(
+                                            ui.available_rect_before_wrap(),
+                                            0.0,
+                                            Color32::YELLOW,
+                                        );
+                                        ui.label("width: 50%\nheight: 1/3 of the red region");
+                                    });
+                                    strip.empty();
+                                });
+                            });
+                        });
+                    });
+                });
+
             egui::Grid::new("some_unique_id").show(ui, |ui| {
-                ui.text_edit_singleline(&mut self.label_a);
-
-                if self.brain.canDecrementA() {
-                    if ui.button("-").clicked() {
-                        self.brain.update(Event::DecrementA);
-                    }
-                } else {
-                    ui.label("");
-                }
-
-                ui.heading(self.brain.state.counterA.to_string());
-                if ui.button("+").clicked() {
-                    self.brain.update(Event::IncrementA);
-                }
                 ui.end_row();
 
                 ui.text_edit_singleline(&mut self.label_b);
 
-                if self.brain.canDecrementB() {
+                if self.brain.can_decrement_b() {
                     if ui.button("-").clicked() {
                         self.brain.update(Event::DecrementB);
                     }
