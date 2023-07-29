@@ -1,4 +1,4 @@
-var cacheName = 'egui-template-pwa';
+var cacheName = 'anotador-de-truco';
 var filesToCache = [
   './',
   './index.html',
