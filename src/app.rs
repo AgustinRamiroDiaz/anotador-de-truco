@@ -104,13 +104,10 @@ impl eframe::App for MyApp {
                         ui.text_style_height(&egui::TextStyle::Body),
                         num_rows,
                         |ui, row_range| {
-                            egui::Grid::new("some_unique_id").show(ui, |ui| {
-                                ui.label("Rondas");
-                                ui.end_row();
-
-                                ui.label(&self.label_a);
-                                ui.label(&self.label_b);
-                                ui.end_row();
+                            ui.label("Rondas");
+                            ui.columns(2, |columns| {
+                                columns[0].label(&self.label_a);
+                                columns[1].label(&self.label_b);
 
                                 self.brain
                                     .state_history
@@ -120,9 +117,8 @@ impl eframe::App for MyApp {
                                     .skip(row_range.start)
                                     .take(row_range.count())
                                     .for_each(|(_, state)| {
-                                        ui.label(state.counterA.to_string());
-                                        ui.label(state.counterB.to_string());
-                                        ui.end_row()
+                                        columns[0].label(state.counterA.to_string());
+                                        columns[1].label(state.counterB.to_string());
                                     });
                             });
                         },
@@ -132,7 +128,6 @@ impl eframe::App for MyApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.columns(2, |columns| {
                 (|ui: &mut egui::Ui| {
-                    ui.label("First column");
                     ui.text_edit_singleline(&mut self.label_a);
                     ui.horizontal(|ui| {
                         ui.add_enabled_ui(self.brain.can_decrement_a(), |ui| {
@@ -149,8 +144,6 @@ impl eframe::App for MyApp {
                 })(&mut columns[0]);
 
                 (|ui: &mut egui::Ui| {
-                    ui.label("Second column");
-
                     ui.text_edit_singleline(&mut self.label_b);
 
                     ui.horizontal(|ui| {
