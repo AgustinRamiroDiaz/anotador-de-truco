@@ -72,28 +72,38 @@ impl eframe::App for MyApp {
             });
         });
 
-        egui::TopBottomPanel::bottom("bottom_panel").show(ctx, |ui| {
-            egui::Grid::new("some_unique_id").show(ui, |ui| {
-                ui.label("Rondas");
-                ui.end_row();
+        egui::TopBottomPanel::bottom("bottom_panel")
+            .resizable(true)
+            .show(ctx, |ui| {
+                let text_style = egui::TextStyle::Body;
+                let row_height = ui.text_style_height(&text_style);
+                let num_rows = self.brain.state_history.len();
+                egui::ScrollArea::vertical()
+                    .auto_shrink([false; 2])
+                    .show_rows(ui, row_height, num_rows, |ui, row_range| {
+                        egui::Grid::new("some_unique_id").show(ui, |ui| {
+                            ui.label("Rondas");
+                            ui.end_row();
 
-                ui.label(&self.label_a);
-                ui.label(&self.label_b);
-                ui.end_row();
+                            ui.label(&self.label_a);
+                            ui.label(&self.label_b);
+                            ui.end_row();
 
-                self.brain
-                    .state_history
-                    .iter()
-                    .enumerate()
-                    .rev()
-                    .for_each(|(i, state)| {
-                        let i = i + 1;
-                        ui.label(state.counterA.to_string());
-                        ui.label(state.counterB.to_string());
-                        ui.end_row()
+                            self.brain
+                                .state_history
+                                .iter()
+                                .enumerate()
+                                .rev()
+                                .skip(row_range.start)
+                                .take(row_range.count())
+                                .for_each(|(_, state)| {
+                                    ui.label(state.counterA.to_string());
+                                    ui.label(state.counterB.to_string());
+                                    ui.end_row()
+                                });
+                        });
                     });
             });
-        });
 
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::Grid::new("some_unique_id").show(ui, |ui| {
