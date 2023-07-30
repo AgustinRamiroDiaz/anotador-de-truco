@@ -145,9 +145,11 @@ impl eframe::App for MyApp {
             });
 
             ui.menu_button("Operaciones riesgosas", |ui| {
-                if ui.button("Cargar ultima ronda").clicked() {
-                    self.brain.update(Event::Rollback);
-                }
+                ui.add_enabled_ui(!self.brain.state_history.is_empty(), |ui| {
+                    if ui.button("Cargar ultima ronda").clicked() {
+                        self.brain.update(Event::Rollback);
+                    }
+                });
 
                 if ui.button("Limpiar").clicked() {
                     self.brain.update(Event::Clear);
