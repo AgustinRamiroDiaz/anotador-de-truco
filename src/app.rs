@@ -38,24 +38,25 @@ impl MyApp {
         // style.spacing.text_edit_width = 10.0;
         // cc.egui_ctx.set_style(style);
 
-        let font_id = FontId {
-            size: 50.0,
-            family: egui::FontFamily::Proportional,
-        };
+        // let font_id = FontId {
+        //     size: 24.0,
+        //     family: egui::FontFamily::Proportional,
+        // };
 
-        let mut style = egui::Style::default();
+        // let mut style = egui::Style::default();
 
-        [
-            egui::TextStyle::Body,
-            egui::TextStyle::Button,
-            egui::TextStyle::Heading,
-        ]
-        .into_iter()
-        .for_each(|text_style| {
-            style.text_styles.insert(text_style, font_id.clone());
-        });
+        // [
+        //     egui::TextStyle::Body,
+        //     egui::TextStyle::Button,
+        //     egui::TextStyle::Heading,
+        // ]
+        // .into_iter()
+        // .for_each(|text_style| {
+        //     style.text_styles.insert(text_style, font_id.clone());
+        // });
 
-        cc.egui_ctx.set_style(style);
+        // cc.egui_ctx.set_style(style);
+        // cc.egui_ctx.set_visuals(5.0);
 
         // Load previous app state (if any).
         // Note that you must enable the `persistence` feature for this to work.
