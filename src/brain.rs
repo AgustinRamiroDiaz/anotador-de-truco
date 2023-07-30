@@ -79,4 +79,12 @@ impl Brain {
             self.state.counterB > 0
         }
     }
+
+    pub fn can_commit(&self) -> bool {
+        if let Some(state) = self.state_history.last() {
+            state != &self.state
+        } else {
+            true
+        }
+    }
 }

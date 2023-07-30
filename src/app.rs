@@ -112,13 +112,11 @@ impl eframe::App for MyApp {
                 ui.end_row();
 
                 ui.horizontal(|ui| {
-                    if self.brain.can_decrement_a() {
+                    ui.add_enabled_ui(self.brain.can_decrement_a(), |ui| {
                         if ui.button("-").clicked() {
                             self.brain.update(Event::DecrementA);
                         }
-                    } else {
-                        ui.label("");
-                    }
+                    });
 
                     ui.heading(self.brain.state.counterA.to_string());
                     if ui.button("+").clicked() {
@@ -127,13 +125,11 @@ impl eframe::App for MyApp {
                 });
 
                 ui.horizontal(|ui| {
-                    if self.brain.can_decrement_b() {
+                    ui.add_enabled_ui(self.brain.can_decrement_b(), |ui| {
                         if ui.button("-").clicked() {
                             self.brain.update(Event::DecrementB);
                         }
-                    } else {
-                        ui.label("-");
-                    }
+                    });
                     ui.heading(self.brain.state.counterB.to_string());
                     if ui.button("+").clicked() {
                         self.brain.update(Event::IncrementB);
@@ -142,9 +138,11 @@ impl eframe::App for MyApp {
                 ui.end_row();
             });
 
-            if ui.button("Guardar ronda").clicked() {
-                self.brain.update(Event::Commit);
-            }
+            ui.add_enabled_ui(self.brain.can_commit(), |ui| {
+                if ui.button("Guardar ronda").clicked() {
+                    self.brain.update(Event::Commit);
+                }
+            });
 
             ui.menu_button("Operaciones riesgosas", |ui| {
                 if ui.button("Cargar ultima ronda").clicked() {
