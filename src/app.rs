@@ -1,5 +1,7 @@
 use std::borrow::BorrowMut;
 
+use egui::FontId;
+
 use crate::brain::*;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
@@ -35,6 +37,25 @@ impl MyApp {
         // let mut style: egui::Style = cc.egui_ctx.style();
         // style.spacing.text_edit_width = 10.0;
         // cc.egui_ctx.set_style(style);
+
+        let font_id = FontId {
+            size: 50.0,
+            family: egui::FontFamily::Proportional,
+        };
+
+        let mut style = egui::Style::default();
+
+        [
+            egui::TextStyle::Body,
+            egui::TextStyle::Button,
+            egui::TextStyle::Heading,
+        ]
+        .into_iter()
+        .for_each(|text_style| {
+            style.text_styles.insert(text_style, font_id.clone());
+        });
+
+        cc.egui_ctx.set_style(style);
 
         // Load previous app state (if any).
         // Note that you must enable the `persistence` feature for this to work.
@@ -75,67 +96,76 @@ impl eframe::App for MyApp {
         egui::TopBottomPanel::bottom("bottom_panel")
             .resizable(true)
             .show(ctx, |ui| {
-                let text_style = egui::TextStyle::Body;
-                let row_height = ui.text_style_height(&text_style);
                 let num_rows = self.brain.state_history.len();
                 egui::ScrollArea::vertical()
                     .auto_shrink([false; 2])
-                    .show_rows(ui, row_height, num_rows, |ui, row_range| {
-                        egui::Grid::new("some_unique_id").show(ui, |ui| {
-                            ui.label("Rondas");
-                            ui.end_row();
+                    .show_rows(
+                        ui,
+                        ui.text_style_height(&egui::TextStyle::Body),
+                        num_rows,
+                        |ui, row_range| {
+                            egui::Grid::new("some_unique_id").show(ui, |ui| {
+                                ui.label("Rondas");
+                                ui.end_row();
 
-                            ui.label(&self.label_a);
-                            ui.label(&self.label_b);
-                            ui.end_row();
+                                ui.label(&self.label_a);
+                                ui.label(&self.label_b);
+                                ui.end_row();
 
-                            self.brain
-                                .state_history
-                                .iter()
-                                .enumerate()
-                                .rev()
-                                .skip(row_range.start)
-                                .take(row_range.count())
-                                .for_each(|(_, state)| {
-                                    ui.label(state.counterA.to_string());
-                                    ui.label(state.counterB.to_string());
-                                    ui.end_row()
-                                });
-                        });
-                    });
+                                self.brain
+                                    .state_history
+                                    .iter()
+                                    .enumerate()
+                                    .rev()
+                                    .skip(row_range.start)
+                                    .take(row_range.count())
+                                    .for_each(|(_, state)| {
+                                        ui.label(state.counterA.to_string());
+                                        ui.label(state.counterB.to_string());
+                                        ui.end_row()
+                                    });
+                            });
+                        },
+                    );
             });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            egui::Grid::new("some_unique_id").show(ui, |ui| {
-                ui.text_edit_singleline(&mut self.label_a);
-                ui.text_edit_singleline(&mut self.label_b);
-                ui.end_row();
+            // ui.vertical_centered(|ui| {});
+            ui.columns(2, |columns| {
+                (|ui: &mut egui::Ui| {
+                    ui.label("First column");
+                    ui.text_edit_singleline(&mut self.label_a);
+                    ui.horizontal(|ui| {
+                        ui.add_enabled_ui(self.brain.can_decrement_a(), |ui| {
+                            if ui.button("-").clicked() {
+                                self.brain.update(Event::DecrementA);
+                            }
+                        });
 
-                ui.horizontal(|ui| {
-                    ui.add_enabled_ui(self.brain.can_decrement_a(), |ui| {
-                        if ui.button("-").clicked() {
-                            self.brain.update(Event::DecrementA);
+                        ui.heading(self.brain.state.counterA.to_string());
+                        if ui.button("+").clicked() {
+                            self.brain.update(Event::IncrementA);
                         }
                     });
+                })(&mut columns[0]);
 
-                    ui.heading(self.brain.state.counterA.to_string());
-                    if ui.button("+").clicked() {
-                        self.brain.update(Event::IncrementA);
-                    }
-                });
+                (|ui: &mut egui::Ui| {
+                    ui.label("Second column");
 
-                ui.horizontal(|ui| {
-                    ui.add_enabled_ui(self.brain.can_decrement_b(), |ui| {
-                        if ui.button("-").clicked() {
-                            self.brain.update(Event::DecrementB);
+                    ui.text_edit_singleline(&mut self.label_b);
+
+                    ui.horizontal(|ui| {
+                        ui.add_enabled_ui(self.brain.can_decrement_b(), |ui| {
+                            if ui.button("-").clicked() {
+                                self.brain.update(Event::DecrementB);
+                            }
+                        });
+                        ui.heading(self.brain.state.counterB.to_string());
+                        if ui.button("+").clicked() {
+                            self.brain.update(Event::IncrementB);
                         }
                     });
-                    ui.heading(self.brain.state.counterB.to_string());
-                    if ui.button("+").clicked() {
-                        self.brain.update(Event::IncrementB);
-                    }
-                });
-                ui.end_row();
+                })(&mut columns[1]);
             });
 
             ui.add_enabled_ui(self.brain.can_commit(), |ui| {
