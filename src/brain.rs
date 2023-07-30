@@ -64,7 +64,7 @@ impl Brain {
         }
     }
 
-    pub fn canDecrementA(&self) -> bool {
+    pub fn can_decrement_a(&self) -> bool {
         if let Some(state) = self.state_history.last() {
             state.counterA < self.state.counterA
         } else {
@@ -72,7 +72,7 @@ impl Brain {
         }
     }
 
-    pub fn canDecrementB(&self) -> bool {
+    pub fn can_decrement_b(&self) -> bool {
         if let Some(state) = self.state_history.last() {
             state.counterB < self.state.counterB
         } else {

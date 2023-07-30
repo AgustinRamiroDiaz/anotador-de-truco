@@ -1,3 +1,5 @@
+use std::borrow::BorrowMut;
+
 use crate::brain::*;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
@@ -29,6 +31,10 @@ impl MyApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         // This is also where you can customize the look and feel of egui using
         // `cc.egui_ctx.set_visuals` and `cc.egui_ctx.set_fonts`.
+
+        // let mut style: egui::Style = cc.egui_ctx.style();
+        // style.spacing.text_edit_width = 10.0;
+        // cc.egui_ctx.set_style(style);
 
         // Load previous app state (if any).
         // Note that you must enable the `persistence` feature for this to work.
@@ -66,56 +72,65 @@ impl eframe::App for MyApp {
             });
         });
 
-        egui::SidePanel::left("side_panel").show(ctx, |ui| {
-            self.brain
-                .state_history
-                .iter()
-                .enumerate()
-                .rev()
-                .for_each(|(i, state)| {
-                    let i = i + 1;
-                    ui.label(format!(
-                        "Ronda {}: {} {}-{} {}",
-                        i, self.label_a, state.counterA, state.counterB, self.label_b
-                    ));
-                });
+        egui::TopBottomPanel::bottom("bottom_panel").show(ctx, |ui| {
+            egui::Grid::new("some_unique_id").show(ui, |ui| {
+                ui.label("Rondas");
+                ui.end_row();
+
+                ui.label(&self.label_a);
+                ui.label(&self.label_b);
+                ui.end_row();
+
+                self.brain
+                    .state_history
+                    .iter()
+                    .enumerate()
+                    .rev()
+                    .for_each(|(i, state)| {
+                        let i = i + 1;
+                        ui.label(state.counterA.to_string());
+                        ui.label(state.counterB.to_string());
+                        ui.end_row()
+                    });
+            });
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::Grid::new("some_unique_id").show(ui, |ui| {
                 ui.text_edit_singleline(&mut self.label_a);
-
-                if self.brain.canDecrementA() {
-                    if ui.button("-").clicked() {
-                        self.brain.update(Event::DecrementA);
-                    }
-                } else {
-                    ui.label("");
-                }
-
-                ui.heading(self.brain.state.counterA.to_string());
-                if ui.button("+").clicked() {
-                    self.brain.update(Event::IncrementA);
-                }
+                ui.text_edit_singleline(&mut self.label_b);
                 ui.end_row();
 
-                ui.text_edit_singleline(&mut self.label_b);
-
-                if self.brain.canDecrementB() {
-                    if ui.button("-").clicked() {
-                        self.brain.update(Event::DecrementB);
+                ui.horizontal(|ui| {
+                    if self.brain.can_decrement_a() {
+                        if ui.button("-").clicked() {
+                            self.brain.update(Event::DecrementA);
+                        }
+                    } else {
+                        ui.label("");
                     }
-                } else {
-                    ui.label("");
-                }
-                ui.heading(self.brain.state.counterB.to_string());
-                if ui.button("+").clicked() {
-                    self.brain.update(Event::IncrementB);
-                }
+
+                    ui.heading(self.brain.state.counterA.to_string());
+                    if ui.button("+").clicked() {
+                        self.brain.update(Event::IncrementA);
+                    }
+                });
+
+                ui.horizontal(|ui| {
+                    if self.brain.can_decrement_b() {
+                        if ui.button("-").clicked() {
+                            self.brain.update(Event::DecrementB);
+                        }
+                    } else {
+                        ui.label("");
+                    }
+                    ui.heading(self.brain.state.counterB.to_string());
+                    if ui.button("+").clicked() {
+                        self.brain.update(Event::IncrementB);
+                    }
+                });
                 ui.end_row();
             });
-
-            ui.horizontal(|ui| {});
 
             if ui.button("Guardar ronda").clicked() {
                 self.brain.update(Event::Commit);
