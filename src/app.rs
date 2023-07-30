@@ -132,7 +132,7 @@ impl eframe::App for MyApp {
                             self.brain.update(Event::DecrementB);
                         }
                     } else {
-                        ui.label("");
+                        ui.label("-");
                     }
                     ui.heading(self.brain.state.counterB.to_string());
                     if ui.button("+").clicked() {
@@ -146,13 +146,15 @@ impl eframe::App for MyApp {
                 self.brain.update(Event::Commit);
             }
 
-            if ui.button("Cargar ultima ronda").clicked() {
-                self.brain.update(Event::Rollback);
-            }
+            ui.menu_button("Operaciones riesgosas", |ui| {
+                if ui.button("Cargar ultima ronda").clicked() {
+                    self.brain.update(Event::Rollback);
+                }
 
-            if ui.button("Limpiar").clicked() {
-                self.brain.update(Event::Clear);
-            }
+                if ui.button("Limpiar").clicked() {
+                    self.brain.update(Event::Clear);
+                }
+            });
 
             egui::warn_if_debug_build(ui);
         });
