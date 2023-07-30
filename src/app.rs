@@ -130,7 +130,6 @@ impl eframe::App for MyApp {
             });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            // ui.vertical_centered(|ui| {});
             ui.columns(2, |columns| {
                 (|ui: &mut egui::Ui| {
                     ui.label("First column");
@@ -168,22 +167,26 @@ impl eframe::App for MyApp {
                 })(&mut columns[1]);
             });
 
-            ui.add_enabled_ui(self.brain.can_commit(), |ui| {
-                if ui.button("Guardar ronda").clicked() {
-                    self.brain.update(Event::Commit);
-                }
-            });
-
-            ui.menu_button("Operaciones riesgosas", |ui| {
-                ui.add_enabled_ui(!self.brain.state_history.is_empty(), |ui| {
-                    if ui.button("Cargar ultima ronda").clicked() {
-                        self.brain.update(Event::Rollback);
+            ui.vertical_centered(|ui| {
+                ui.add_enabled_ui(self.brain.can_commit(), |ui| {
+                    if ui.button("Guardar ronda").clicked() {
+                        self.brain.update(Event::Commit);
                     }
                 });
 
-                if ui.button("Limpiar").clicked() {
-                    self.brain.update(Event::Clear);
-                }
+                ui.menu_button("Operaciones riesgosas", |ui| {
+                    ui.add_enabled_ui(!self.brain.state_history.is_empty(), |ui| {
+                        ui.horizontal(|ui| {
+                            if ui.button("Cargar ultima ronda").clicked() {
+                                self.brain.update(Event::Rollback);
+                            }
+                        });
+                    });
+
+                    if ui.button("Limpiar").clicked() {
+                        self.brain.update(Event::Clear);
+                    }
+                });
             });
 
             egui::warn_if_debug_build(ui);
